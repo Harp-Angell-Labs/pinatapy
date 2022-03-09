@@ -2,6 +2,8 @@
 
 import os
 import typing as tp
+import base64
+from io import BytesIO
 
 import requests
 
@@ -52,6 +54,42 @@ class PinataPy:
             files = [("file",(file, open(file, "rb"))) for file in all_files]
         else:
             files = [("file", open(path_to_file, "rb"))]
+
+        if options is not None:
+            if "pinataMetadata" in options:
+                headers["pinataMetadata"] = options["pinataMetadata"]
+            if "pinataOptions" in options:
+                headers["pinataOptions"] = options["pinataOptions"]
+        response: requests.Response = requests.post(url=url, files=files, headers=headers)
+        return response.json() if response.ok else self._error(response)  # type: ignore
+
+    def pin_data_to_ipfs(self, filename: str, data: str, options: tp.Optional[OptionsDict] = None) -> ResponsePayload:
+        """
+        Pin any data, to Pinata's IPFS nodes
+
+        More: https://docs.pinata.cloud/api-pinning/pin-file
+        """
+        url: str = API_ENDPOINT + "pinning/pinFileToIPFS"
+        headers: Headers = { k: self._auth_headers[k] for k in ["pinata_api_key", "pinata_secret_api_key"] }
+
+        # def get_all_files(directory: str) -> tp.List[str]:
+        #     """get a list of absolute paths to every file located in the directory"""
+        #     paths: tp.List[str] = []
+        #     for root, dirs, files_ in os.walk(os.path.abspath(directory)):
+        #         for file in files_:
+        #             paths.append(os.path.join(root, file))
+        #     return paths
+
+        files: tp.List[str, tp.Any]
+
+        # if os.path.isdir(path_to_file):
+        #     all_files: tp.List[str] = get_all_files(path_to_file)
+        #     files = [("file",(file, open(file, "rb"))) for file in all_files]
+        # else:
+        #     files = [("file", open(path_to_file, "rb"))]
+
+        files = {'file': (filename, BytesIO(base64.decodebytes(data)), 'application/octet-stream')}
+        print(files)
 
         if options is not None:
             if "pinataMetadata" in options:
