@@ -63,7 +63,7 @@ class PinataPy:
         response: requests.Response = requests.post(url=url, files=files, headers=headers)
         return response.json() if response.ok else self._error(response)  # type: ignore
 
-    def pin_data_to_ipfs(self, filename: str, data: str, options: tp.Optional[OptionsDict] = None) -> ResponsePayload:
+    def pin_data_to_ipfs(self, dir: str, filename: str, data: str, options: tp.Optional[OptionsDict] = None) -> ResponsePayload:
         """
         Pin any data, to Pinata's IPFS nodes
 
@@ -89,6 +89,9 @@ class PinataPy:
         #     files = [("file", open(path_to_file, "rb"))]
 
         files = {'file': (filename, BytesIO(base64.decodebytes(data)), 'application/octet-stream')}
+        if dir:
+            files = {'file': (filename, BytesIO(base64.decodebytes(data)), 'application/octet-stream'), f'{dir}/${filename}'}
+        
         print(files)
 
         if options is not None:
