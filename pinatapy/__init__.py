@@ -90,9 +90,9 @@ class PinataPy:
 
         files = {'file': (filename, BytesIO(base64.decodebytes(data)), 'application/octet-stream')}
         if dir:
-            files = {'file': (filename, BytesIO(base64.decodebytes(data)), 'application/octet-stream'), f'{dir}/${filename}'}
-        
-        print(files)
+            files = {
+                'file': (filename, BytesIO(base64.decodebytes(data)), 'application/octet-stream', f'{dir}/{filename}')
+            }
 
         if options is not None:
             if "pinataMetadata" in options:
